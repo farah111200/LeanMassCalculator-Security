@@ -6,6 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.leanmass.model.LbmRecord
 import com.example.leanmass.model.User
+import net.sqlcipher.database.SQLiteDatabase
+import net.sqlcipher.database.SupportFactory
 
 @Database(
     entities = [LbmRecord::class, User::class],
@@ -22,13 +24,17 @@ abstract class AppDatabase : RoomDatabase() {
         private var INSTANCE: AppDatabase? = null
 
         fun getDatabase(context: Context): AppDatabase {
+            // MASVS-STORAGE-1 : Chiffrement de la base de données avec SQLCipher
+            val passphrase = SQLiteDatabase.getBytes("leanmass_secret_key".toCharArray())
+            val factory = SupportFactory(passphrase)
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "lbm_database"
                 )
-                .fallbackToDestructiveMigration() // recrée la DB si version change
+                .openHelperFactory(factory) // Active le chiffrement SQLCipher
+                .fallbackToDestructiveMigration()
                 .build()
                 INSTANCE = instance
                 instance
