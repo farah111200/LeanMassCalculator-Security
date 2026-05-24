@@ -36,8 +36,12 @@ class RegisterActivity : AppCompatActivity() {
                     Toast.makeText(this, "Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show()
                 password != confirm ->
                     Toast.makeText(this, "Les mots de passe ne correspondent pas", Toast.LENGTH_SHORT).show()
-                password.length < 6 ->
-                    Toast.makeText(this, "Le mot de passe doit contenir au moins 6 caractères", Toast.LENGTH_SHORT).show()
+                !isPasswordStrong(password) ->
+                    Toast.makeText(
+                        this,
+                        "8 caractères min, 1 majuscule, 1 chiffre, 1 caractère spécial",
+                        Toast.LENGTH_LONG
+                    ).show()
                 else -> authViewModel.register(email, password)
             }
         }
@@ -58,5 +62,10 @@ class RegisterActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun isPasswordStrong(password: String): Boolean {
+        val regex = Regex("^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%^&*()_+]).{8,}$")
+        return regex.matches(password)
     }
 }

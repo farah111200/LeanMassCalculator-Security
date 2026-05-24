@@ -18,6 +18,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val auth = FirebaseAuth.getInstance()
     private val userDao = AppDatabase.getDatabase(application).userDao()
     private val firestore = FirebaseFirestore.getInstance()
+    private var failedAttempts = 0
+    private var lockoutEndTime = 0L
 
     private val _authState = MutableLiveData<AuthState>()
     val authState: LiveData<AuthState> = _authState
@@ -50,9 +52,16 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun login(email: String, password: String) {
+        if (System.currentTimeMillis() < lockoutEndTime) {
+            val remaining = (lockoutEndTime - System.currentTimeMillis()) / 1000
+            _authState.value = AuthState.Error("Trop de tentatives. Réessayez dans $remaining secondes.")
+            return
+        }
+
         _authState.value = AuthState.Loading
         auth.signInWithEmailAndPassword(email, password)
             .addOnSuccessListener { result ->
+                failedAttempts = 0
                 val uid = result.user?.uid ?: return@addOnSuccessListener
                 val date = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
 
@@ -72,7 +81,14 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 _authState.value = AuthState.Success
             }
             .addOnFailureListener { e ->
-                _authState.value = AuthState.Error(e.message ?: "Erreur inconnue")
+                failedAttempts++
+                if (failedAttempts >= 5) {
+                    lockoutEndTime = System.currentTimeMillis() + 30_000
+                    failedAttempts = 0
+                    _authState.value = AuthState.Error("Compte bloqué 30 secondes après 5 tentatives échouées.")
+                } else {
+                    _authState.value = AuthState.Error(e.message ?: "Erreur inconnue")
+                }
             }
     }
 
