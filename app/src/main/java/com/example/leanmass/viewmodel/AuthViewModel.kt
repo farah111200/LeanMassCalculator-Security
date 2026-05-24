@@ -81,28 +81,4 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 _authState.value = AuthState.Success
             }
             .addOnFailureListener { e ->
-                failedAttempts++
-                if (failedAttempts >= 5) {
-                    lockoutEndTime = System.currentTimeMillis() + 30_000
-                    failedAttempts = 0
-                    _authState.value = AuthState.Error("Compte bloqué 30 secondes après 5 tentatives échouées.")
-                } else {
-                    _authState.value = AuthState.Error(e.message ?: "Erreur inconnue")
-                }
-            }
-    }
-
-    fun logout() = auth.signOut()
-
-    fun currentUserId(): String? = auth.currentUser?.uid
-
-    fun currentUserEmail(): String? = auth.currentUser?.email
-
-    fun isLoggedIn(): Boolean = auth.currentUser != null
-}
-
-sealed class AuthState {
-    object Loading : AuthState()
-    object Success : AuthState()
-    data class Error(val message: String) : AuthState()
-}
+   

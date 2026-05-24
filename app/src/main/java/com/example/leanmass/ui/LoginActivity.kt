@@ -18,7 +18,7 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // MASVS-PLATFORM-4 : Empêcher les captures d'écran sur écran sensible
+        // MASVS-PLATFORM-3 : Empêcher les captures d'écran sur écran sensible
         window.setFlags(
             WindowManager.LayoutParams.FLAG_SECURE,
             WindowManager.LayoutParams.FLAG_SECURE
@@ -51,16 +51,4 @@ class LoginActivity : AppCompatActivity() {
             when (state) {
                 is AuthState.Loading -> binding.btnLogin.isEnabled = false
                 is AuthState.Success -> goToMain()
-                is AuthState.Error  -> {
-                    binding.btnLogin.isEnabled = true
-                    Toast.makeText(this, state.message, Toast.LENGTH_LONG).show()
-                }
-            }
-        }
-    }
-
-    private fun goToMain() {
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
-    }
-}
+                is AuthState.Error 

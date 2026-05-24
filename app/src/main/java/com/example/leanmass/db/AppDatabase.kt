@@ -29,16 +29,4 @@ abstract class AppDatabase : RoomDatabase() {
             val factory = SupportFactory(passphrase)
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    "lbm_database"
-                )
-                .openHelperFactory(factory) // Active le chiffrement SQLCipher
-                .fallbackToDestructiveMigration()
-                .build()
-                INSTANCE = instance
-                instance
-            }
-        }
-    }
-}
+  
